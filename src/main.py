@@ -62,6 +62,27 @@ def delete_contact(id):
     response = list(map(lambda x: x.serialize(), response))
 
     return jsonify(response), 200
+
+@app.route('/contacts/<int:id>', methods=['PUT'])
+def update_contact(id):
+    contact_to_update = Contact.query.get(id)
+    if contact_to_update is None:
+        raise APIException('User not found', status_code=404)
+    body = request.get_json()
+    if 'full_name' in body:
+        contact_to_update.full_name = body['full_name']
+    if 'address' in body:
+        contact_to_update.address = body['address']
+    if 'phone' in body:
+        contact_to_update.phone = body['phone']
+    if 'email' in body:
+        contact_to_update.email = body['email']
+    db.session.commit()
+    response = Contact.query.all()
+    response = list(map(lambda x: x.serialize(), response))
+    
+    return jsonify(response), 200
+
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
